@@ -30,6 +30,10 @@ If conflict: fix code/schema to match intentional design, then update this file 
    - intent: `抱怨|建议|询问|其他`
    - emotion: `不满|焦虑|期待|中性`
    - facility_scope: `road_lighting|public_charging|public_transit`
+9. `PostCleaned.meta.is_mediated` (additive, default `false`): `true` means mediated / second-hand
+   citizen demand (e.g. 接诉即办转述「市民反映…」), not first-person resident post. Downstream
+   may segment or down-weight; must not treat as required field breakage. Lab1 keeps these rows
+   only when the underlying demand is still unresolved (办结通稿 are dropped upstream).
 
 ## Breaking vs additive changes
 

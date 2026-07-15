@@ -27,6 +27,9 @@ data/raw/*
 !data/raw/crawl_*.jsonl
 data/cleaned/*
 !data/cleaned/.gitkeep
+# Handoff: allow Lab2/Lab3 to pull integration-ready kept set + report
+!data/cleaned/beijing_cleaned.jsonl
+!data/cleaned/lab1_cleaning_report.json
 data/analyzed/*
 !data/analyzed/.gitkeep
 data/reports/*

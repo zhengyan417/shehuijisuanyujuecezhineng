@@ -21,28 +21,25 @@ Humans mainly assign roles in `collab/ROLE_CLAIM.md` and open the remote git lat
 
 ```bash
 python -m pip install -r requirements.txt
-# REAL DATA REQUIRED — put Cookie then crawl before any Lab run:
-#   secrets/weibo_cookie.txt
-#   python scripts/run_weibo_crawl.py
-#   python scripts/convert_weibo_to_lab1.py --run-lab1
+playwright install chromium
+# REAL DATA REQUIRED:
+#   python scripts/run_weibo_crawl.py --smoke --run-lab1
+#   python scripts/run_weibo_crawl.py --run-lab1
 python scripts/run_pipeline.py
 python -m pytest -q
 ```
 
 **绝对禁止假数据。** 没有 `data/raw/crawl_*.jsonl` / `import_*.jsonl` 时流水线必须失败退出。
 
-### Real Weibo crawl (Lab1)
-
-Vendored crawler: `third_party/weibo-search` = [dataabc/weibo-search](https://github.com/dataabc/weibo-search)
+### Real Weibo crawl (Lab1, crawl4weibo)
 
 ```bash
 pip install -r requirements.txt
-# put Cookie into secrets/weibo_cookie.txt
-python scripts/run_weibo_crawl.py
-python scripts/convert_weibo_to_lab1.py --run-lab1
+playwright install chromium
+# optional: secrets/weibo_cookie.txt
+python scripts/run_weibo_crawl.py --smoke
+python scripts/run_weibo_crawl.py --pages 1 --max-posts 800 --run-lab1
 ```
-
-See `third_party/README_weibo_search.md`.
 
 ## Layout
 
@@ -54,7 +51,6 @@ src/common            # SHARED contract models
 configs/              # taxonomy + mapping
 schemas/              # JSON schemata mirroring pydantic
 collab/               # multi-agent collaboration protocol
-fixtures/             # reproducible samples
 ```
 
 ## Remote git

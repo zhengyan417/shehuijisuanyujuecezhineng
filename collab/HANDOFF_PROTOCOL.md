@@ -28,11 +28,13 @@ Important: do **not** rely on committing large `data/` outputs. Handoff by makin
 
 ### Lab1 -> Lab2 gate
 
-Lab2 may start model work anytime against fixture+cleaned schema, but integration requires:
+Lab2 may start model work anytime against cleaned schema, but integration requires:
 
-- `python scripts/run_lab1.py` succeeds
+- `python scripts/run_lab1.py` succeeds（真实 crawl/import，禁止假数据）
 - output validates as `PostCleaned`
 - at least one record per facility scope in samples
+
+**2026-07-15:** Gate marked **READY** by Lab1 — see `collab/inbox/lab1_to_lab2_20260715_cleaned_ready.md`.
 
 ### Lab2 -> Lab3 gate
 

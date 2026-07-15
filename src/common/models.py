@@ -48,6 +48,8 @@ class Lab1Meta(BaseModel):
     dropped: bool = False
     drop_reason: Optional[str] = None
     facility_scope_hint: Optional[FacilityScope] = None
+    # B类：媒体/接诉转述市民诉求（非一手居民发帖）
+    is_mediated: bool = False
 
 
 class PostCleaned(BaseModel):

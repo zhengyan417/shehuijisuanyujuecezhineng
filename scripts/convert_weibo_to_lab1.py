@@ -1,5 +1,11 @@
 #!/usr/bin/env python
-"""Convert weibo-search CSV results -> data/raw/crawl_weibo_beijing.jsonl then optionally run Lab1."""
+"""Run Lab1 clean over existing data/raw/crawl_*.jsonl or import_*.jsonl.
+
+OWNER: AGENT_LAB1
+
+Legacy name kept for teammates. Scrapy CSV conversion is removed —
+use crawl4weibo via scripts/run_weibo_crawl.py instead.
+"""
 
 from __future__ import annotations
 
@@ -12,23 +18,26 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.lab1_collection.collector import run_lab1
-from src.lab1_collection.weibo_adapter import RESULT_ROOT, convert_weibo_csvs
+from src.lab1_collection.sources import CollectionError
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run-lab1", action="store_true", help="after convert, run Lab1 --source raw")
+    parser.add_argument(
+        "--run-lab1",
+        action="store_true",
+        default=True,
+        help="run Lab1 on existing crawl_/import_ jsonl (default: true)",
+    )
     args = parser.parse_args()
-
-    if not RESULT_ROOT.exists():
-        raise SystemExit(
-            f"No crawler output at {RESULT_ROOT}. Run: python scripts/run_weibo_crawl.py first."
-        )
-    out = convert_weibo_csvs()
-    print(f"[convert] wrote {out}")
-    if args.run_lab1:
+    if not args.run_lab1:
+        raise SystemExit("Nothing to do. Use scripts/run_weibo_crawl.py to crawl.")
+    try:
         cleaned = run_lab1(source="raw")
-        print(f"[lab1] wrote {cleaned}")
+    except CollectionError as e:
+        print(str(e), file=sys.stderr)
+        raise SystemExit(2) from e
+    print(f"[lab1] wrote {cleaned}")
 
 
 if __name__ == "__main__":

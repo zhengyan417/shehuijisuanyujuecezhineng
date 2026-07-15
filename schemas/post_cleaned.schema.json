@@ -35,7 +35,8 @@
         "facility_scope_hint": {
           "type": ["string", "null"],
           "enum": ["road_lighting", "public_charging", "public_transit", null]
-        }
+        },
+        "is_mediated": { "type": "boolean" }
       }
     }
   }

@@ -1,15 +1,12 @@
 """Lab1 orchestration — collect raw posts and produce PostCleaned JSONL.
 
 OWNER: AGENT_LAB1
-READS: configs/keywords_taxonomy.yaml, configs/city_beijing.yaml, data/raw/crawl_*|import_*
-WRITES: data/raw snapshots, data/cleaned/*.jsonl
-MUST NOT EDIT: src/lab2_analysis/**, src/lab3_decision/**, configs/need_mapping.yaml
-
-Hard policy: no fake social posts. Without real crawl/import, raise CollectionError.
+Mechanical clean + optional NVIDIA LLM semantic gate (no keyword blacklists).
 """
 
 from __future__ import annotations
 
+import os
 from collections import Counter
 
 from src.common.io import dump_models, write_json, write_jsonl
@@ -42,12 +39,32 @@ def _stats(cleaned) -> dict:
 def run_lab1(
     output_name: str = "beijing_cleaned.jsonl",
     source: SourceMode = "auto",
+    *,
+    llm_filter: bool | None = None,
+    llm_workers: int = 6,
+    llm_batch_size: int = 8,
+    llm_model: str | None = None,
 ) -> str:
     ensure_data_dirs()
     posts, provenance = collect_raw_posts(mode=source)
     persist_raw_snapshot(posts, provenance)
 
     cleaned = clean_posts(posts)
+
+    use_llm = llm_filter
+    if use_llm is None:
+        use_llm = os.getenv("LAB1_LLM_FILTER", "0").strip() in {"1", "true", "True", "yes"}
+    if use_llm:
+        from src.lab1_collection import llm_filter as lf
+
+        model = llm_model or os.getenv("LAB1_LLM_MODEL") or lf.DEFAULT_MODEL
+        cleaned = lf.apply_llm_filter(
+            cleaned,
+            model=model,
+            workers=llm_workers,
+            batch_size=llm_batch_size,
+        )
+
     kept = [c for c in cleaned if not c.meta.dropped]
 
     out_path = CLEANED / output_name
@@ -62,6 +79,7 @@ def run_lab1(
         "fake_data_allowed": provenance.get("fake_data_allowed"),
         "error": provenance.get("error"),
         "raw_count": provenance.get("raw_count"),
+        "llm_filter": bool(use_llm),
     }
     write_json(CLEANED / "lab1_cleaning_report.json", stats)
     return str(out_path)

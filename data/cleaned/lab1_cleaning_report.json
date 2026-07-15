@@ -1,0 +1,28 @@
+{
+  "lab1_version": "lab1-llm-filter-0.6.0",
+  "input_count": 1500,
+  "kept_count": 1473,
+  "dropped_count": 27,
+  "kept_by_scope": {
+    "road_lighting": 975,
+    "public_charging": 491,
+    "public_transit": 7
+  },
+  "drop_reasons": {
+    "duplicate": 26,
+    "too_short": 1
+  },
+  "kept_with_district": 217,
+  "district_coverage": 0.147,
+  "query_plan_size": 360,
+  "taxonomy_version": 5,
+  "provenance": {
+    "mode_requested": "auto",
+    "source_used": "C:\\Users\\25019\\Desktop\\shehuijisuanyujuecezhineng\\data\\raw",
+    "fallback": false,
+    "fake_data_allowed": false,
+    "error": null,
+    "raw_count": 1500,
+    "llm_filter": false
+  }
+}

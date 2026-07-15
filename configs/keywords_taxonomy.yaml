@@ -1,64 +1,81 @@
-# Lab1 keyword taxonomy for Beijing silent-demand discovery.
-# Layers: facility -> symptom -> place_hint -> need_cue
-# Coding agents: treat this file as Lab1-owned. Lab2/Lab3 may READ only.
-#
-# Domain characteristics (presentation + collection strategy):
-# - chronic: complaints persist days/weeks, not a single disaster spike
-# - strongly local: district / POI / landmark is critical for aggregation
-# - non-burst: use continuous multi-query sampling, not event-trigger crawl
-# - multi-intent in the wild: 抱怨 / 建议 / 询问 coexist (handled in Lab2)
+# Lab1 keyword taxonomy — Beijing silent-demand discovery
+# Volume mode: many compact place queries + broader facility/symptom queries.
+# OWNER: AGENT_LAB1
 
-version: 2
+version: 5
 city: 北京
 
 facility_types:
   road_lighting:
-    labels: [路灯, 道路照明, 夜间照明, 灯不亮, 黑灯瞎火, 马路灯, 路灯杆]
-    symptoms: [坏了, 不亮, 太黑, 半亮, 忽明忽暗, 没修, 黑漆漆, 熄灭, 断电]
-    need_cues: [修一下, 能不能修, 希望快点修好, 晚上不敢走, 补装路灯, 照明不够]
+    labels: [路灯, 道路照明, 夜间照明, 路灯杆, 马路灯]
+    symptoms: [不亮, 坏了, 太黑, 没路灯, 漆黑, 黑灯瞎火, 半亮, 忽明忽暗, 摸黑]
+    need_cues: [没人管, 晚上不敢走, 什么时候能修好, 希望修好, 怎么不修, 能不能修]
   public_charging:
-    labels: [充电桩, 公共充电, 新能源充电, 慢充, 快充, 充电站, 换电站]
-    symptoms: [找不到, 排队, 坏了, 被占位, 不够用, 离得远, 故障, 充不上, 排队太久]
-    need_cues: [要是有充电桩就好了, 能不能多装点, 附近有充电吗, 多建充电站]
+    labels: [充电桩, 充电站, 公共充电, 慢充, 快充]
+    symptoms: [排队, 被占位, 不够用, 找不到, 充电难, 充不上, 离得远, 坏了]
+    need_cues: [要是有就好了, 能不能多装, 希望多建, 怎么不安, 附近有充电吗]
   public_transit:
-    labels: [公交站, 公交站台, 候车亭, 天桥, 过街天桥, 人行天桥, 过街设施]
-    symptoms: [太远, 没遮雨, 破损, 不方便过马路, 危险, 拥堵, 没指示, 积水, 台阶坏了]
-    need_cues: [能不能修个天桥, 希望加个站台, 过马路太危险, 修候车亭]
+    labels: [公交站, 候车亭, 天桥, 过街天桥, 站台]
+    symptoms: [不开, 闲置, 没遮雨, 破损, 太远, 过马路危险, 积水, 台阶坏了]
+    need_cues: [什么时候能开放, 希望修好, 能不能修, 没人管, 过马路太危险]
 
 place_hints:
-  districts_prefix: true
-  landmarks_examples:
+  hotspots:
     - 望京
-    - 三里屯
-    - 中关村
-    - 五道口
-    - 西二旗
-    - 上地
+    - 劲松
     - 回龙观
     - 天通苑
+    - 大峪
+    - 金盏
+    - 和平里
+    - 新风街
+    - 西二旗
+    - 五道口
+    - 中关村
     - 通州北苑
-    - 西单
-    - 国贸
-    - 清河
     - 亦庄
-    - 金融街
-    - 王府井
-    - 后沙峪
-    - 良乡
+    - 清河
+    - 国贸
+    - 三里屯
+    - 西单
+    - 上地
     - 苹果园
+    - 良乡
+    - 后沙峪
+    - 石景山
+    - 双井
+    - 酒仙桥
+    - 北苑
+    - 亚运村
+  district_shorts:
+    - 朝阳
+    - 海淀
+    - 丰台
+    - 昌平
+    - 通州
+    - 大兴
+    - 门头沟
+    - 西城
+    - 东城
+    - 石景山
+    - 房山
+    - 顺义
+    - 怀柔
+    - 平谷
+    - 密云
+    - 延庆
 
 platforms:
   primary: [weibo]
-  secondary: [xiaohongshu]
-  # NO fixture fallback. Real crawl/import only.
+  crawler: crawl4weibo
   real_data_only: true
 
 collection_policy:
-  domain_nature: chronic_local_non_burst
-  strategy: continuous_sampling_plus_spatial_agg
-  offline_first: false
+  query_style: compact_place_first_plus_broad
+  avoid_bare_beijing_alone: true
+  allow_beijing_facility_symptom: true
+  target_volume: 500-1000
   fake_data_forbidden: true
   notes: >
-    Public-facility complaints are chronic and strongly geo-local, not disaster-like
-    burst events. Prefer sustained sampling + region aggregation over event-trigger crawl.
-    Team policy: absolutely no fake/fixture posts. Without real Weibo crawl or import, stop.
+    Prefer place-first compact queries; also emit broader 北京+设施+症状 and
+    facility+symptom pairs for recall. Cleaner still filters non-Beijing noise.
