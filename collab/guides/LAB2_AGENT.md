@@ -17,6 +17,7 @@ intent, emotion, entities, mapped_need, urgency_score.
 ## Required outputs
 
 - `data/analyzed/beijing_analyzed.jsonl`
+- `data/analyzed/lab2_analysis_report.json`
 
 ## Domain adaptation focus (presentation-critical)
 
@@ -27,12 +28,13 @@ This domain needs:
 - emotion: 不满 / 焦虑 / 期待 / 中性
 - complaint-to-need mapping dictionary
 
-## Allowed work
+## Current implementation (lab2-0.2.0)
 
-- replace stub rules with BERT/LLM classifiers
-- improve NER lexicons or model-based NER
-- expand need mapping rules for the 3 scopes only
-- weak supervision / annotation utilities under lab2 tree
+Modules:
+- `intent.py` / `emotion.py` / `ner.py` / `mapper.py` / `urgency.py` / `analyzer.py`
+- mapping dictionary `configs/need_mapping.yaml` v2
+
+Fixture pipeline result target: mapped_ratio ~= 1.0 on in-scope cleaned posts.
 
 ## Forbidden
 
@@ -40,18 +42,10 @@ This domain needs:
 - writing Lab3 report logic
 - editing keyword taxonomy ownership file except via inbox request
 
-## Definition of done (Lab2)
-
-1. Depends cleanly on Lab1 artifact path
-2. Majority of in-scope samples get non-null `mapped_need.need_id`
-3. Enum fields stay valid
-4. urgency in [0,1]
-5. `python scripts/run_lab2.py` + full pipeline green
-
 ## Validation snippet
 
 ```bash
-python scripts/run_lab1.py
+python scripts/run_lab1.py --source fixture
 python scripts/run_lab2.py
 python -c "import json; rows=[json.loads(l) for l in open('data/analyzed/beijing_analyzed.jsonl',encoding='utf-8')]; print(sum(1 for r in rows if r['mapped_need']['need_id']))"
 ```
