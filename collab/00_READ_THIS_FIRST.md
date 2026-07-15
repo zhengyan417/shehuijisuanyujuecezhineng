@@ -13,9 +13,9 @@ Prevent multi-agent collisions while building one runnable pipeline for the cour
 2. **Exclusive directories are hard ownership.** Editing another role's exclusive path is a protocol violation even if "quick fix".
 3. **Schema is law.** `src/common/models.py` + `schemas/*.schema.json` define the only legal inter-module payloads.
 4. **Downstream must not break upstream.** Lab2/Lab3 must consume Lab1/Lab2 artifacts without requiring private side-channel files.
-5. **Fixture must keep pipeline green.** Even if crawl fails, `fixtures/sample_raw/beijing_sample_posts.jsonl` keeps demo alive.
+5. **NO FAKE DATA.** Absolutely forbidden to use fixture/fake social posts as project data. If crawl/import is missing, FAIL. Do not invent rows.
 6. **No silent contract changes.** Any field add/rename/remove = SHARED change + all labs updated in one coordinated series.
-7. **Do not commit runtime dumps under `data/`** except empty markers. Use fixtures for reproducible samples.
+7. **Do not commit secrets** (`secrets/weibo_cookie.txt`). Real crawl dumps may be committed only if privacy-safe (hashed authors).
 8. **Branch naming encodes role:**
    - `lab1/<short-desc>`
    - `lab2/<short-desc>`

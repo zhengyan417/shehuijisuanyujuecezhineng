@@ -7,7 +7,8 @@ You are collaborating in repo silent-demand Beijing course project.
 Read AGENTS.md then collab/00_READ_THIS_FIRST.md before any edit.
 Obey MODULE_OWNERS exclusive paths.
 Keep city=北京 and only facility scopes road_lighting, public_charging, public_transit.
-After changes run: python scripts/run_pipeline.py && python -m pytest -q
+ABSOLUTELY NO fake/fixture social posts as project data. Without real crawl/import, fail.
+After changes run: python -m pytest -q
 Commit with ROLE and CONTRACT_IMPACT trailers per collab/GIT_WORKFLOW.md.
 ```
 
@@ -18,6 +19,7 @@ ROLE=AGENT_LAB1
 Follow collab/guides/LAB1_AGENT.md.
 Improve collection/cleaning only under owned paths.
 Maintain fixture fallback so offline demo never breaks.
+Get real Weibo data via cookie crawl; never invent/fake posts for demos.
 Do not edit lab2/lab3 trees or configs/need_mapping.yaml.
 If you need schema changes, write collab/inbox note and stop before breaking contract.
 ```

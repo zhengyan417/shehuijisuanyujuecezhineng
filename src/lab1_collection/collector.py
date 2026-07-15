@@ -1,15 +1,16 @@
 """Lab1 orchestration — collect raw posts and produce PostCleaned JSONL.
 
 OWNER: AGENT_LAB1
-READS: configs/keywords_taxonomy.yaml, configs/city_beijing.yaml, fixtures/
-WRITES: data/raw/*.jsonl, data/cleaned/*.jsonl
+READS: configs/keywords_taxonomy.yaml, configs/city_beijing.yaml, data/raw/crawl_*|import_*
+WRITES: data/raw snapshots, data/cleaned/*.jsonl
 MUST NOT EDIT: src/lab2_analysis/**, src/lab3_decision/**, configs/need_mapping.yaml
+
+Hard policy: no fake social posts. Without real crawl/import, raise CollectionError.
 """
 
 from __future__ import annotations
 
 from collections import Counter
-from pathlib import Path
 
 from src.common.io import dump_models, write_json, write_jsonl
 from src.common.paths import CLEANED, ensure_data_dirs
@@ -58,6 +59,7 @@ def run_lab1(
         "mode_requested": provenance.get("mode_requested"),
         "source_used": provenance.get("source_used"),
         "fallback": provenance.get("fallback"),
+        "fake_data_allowed": provenance.get("fake_data_allowed"),
         "error": provenance.get("error"),
         "raw_count": provenance.get("raw_count"),
     }
@@ -66,7 +68,6 @@ def run_lab1(
 
 
 def keyword_coverage_report() -> dict:
-    """Helper for presentation: show taxonomy layers exist."""
     tax = load_taxonomy()
     return {
         "version": tax.get("version"),

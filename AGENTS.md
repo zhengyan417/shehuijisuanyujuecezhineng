@@ -39,6 +39,12 @@ Facility scopes = **exactly these three**:
 
 Do **not** expand to parks / toilets / markets / other cities unless humans explicitly vote and update `configs/city_beijing.yaml` + this file in the same change set.
 
+## Hard data policy
+
+**绝对禁止假数据 / fixture 社交媒体样本作为项目数据。**  
+没有 `data/raw/crawl_*.jsonl` 或 `data/raw/import_*.jsonl` 就不跑 Lab1→Lab3。  
+没有真实数据时必须失败退出，而不是静默用样例冒充。
+
 ## Role map
 
 | Role ID | Owns | Must not touch |

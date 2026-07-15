@@ -21,11 +21,15 @@ Humans mainly assign roles in `collab/ROLE_CLAIM.md` and open the remote git lat
 
 ```bash
 python -m pip install -r requirements.txt
+# REAL DATA REQUIRED — put Cookie then crawl before any Lab run:
+#   secrets/weibo_cookie.txt
+#   python scripts/run_weibo_crawl.py
+#   python scripts/convert_weibo_to_lab1.py --run-lab1
 python scripts/run_pipeline.py
 python -m pytest -q
 ```
 
-Offline fixture path is default when `data/raw/` has no crawl outputs.
+**绝对禁止假数据。** 没有 `data/raw/crawl_*.jsonl` / `import_*.jsonl` 时流水线必须失败退出。
 
 ### Real Weibo crawl (Lab1)
 

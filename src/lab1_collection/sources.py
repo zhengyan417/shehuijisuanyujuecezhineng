@@ -1,9 +1,11 @@
-"""Raw data sources for Lab1: fixture / local raw / optional crawl hook.
+"""Raw data sources for Lab1.
 
 OWNER: AGENT_LAB1
 
-Network crawl is OFF by default. Course demo must stay offline-green.
-If a future crawl plugin fails, automatically fall back to fixtures.
+HARD RULE (team policy):
+  ABSOLUTELY NO FAKE / FIXTURE SOCIAL-MEDIA DATA for the course pipeline.
+  If there is no real crawled or manually imported data, FAIL LOUDLY.
+  Do not invent posts. Do not fall back to samples.
 """
 
 from __future__ import annotations
@@ -15,71 +17,60 @@ from typing import Literal
 
 from src.common.io import dump_models, parse_models, read_jsonl, write_json, write_jsonl
 from src.common.models import PostRaw
-from src.common.paths import RAW, SAMPLE_RAW, ensure_data_dirs
+from src.common.paths import RAW, ensure_data_dirs
 from src.lab1_collection.queries import build_queries, queries_as_dicts
 
-SourceMode = Literal["auto", "fixture", "raw", "crawl"]
+SourceMode = Literal["auto", "raw", "crawl"]
 
 
 class CollectionError(RuntimeError):
     pass
 
 
-def load_fixture_posts(path: Path | None = None) -> list[PostRaw]:
-    p = path or SAMPLE_RAW
-    if not p.exists():
-        raise CollectionError(f"fixture missing: {p}")
-    return parse_models(read_jsonl(p), PostRaw)
+NO_FAKE_DATA_MSG = (
+    "NO REAL DATA — refused to use fake/fixture posts.\n"
+    "Team policy: 绝对禁止假数据；没有真实微博数据就不跑流水线。\n"
+    "Get real data first:\n"
+    "  1) put Weibo Cookie into secrets/weibo_cookie.txt\n"
+    "  2) python scripts/run_weibo_crawl.py\n"
+    "  3) python scripts/convert_weibo_to_lab1.py\n"
+    "Or place a real export at data/raw/import_*.jsonl / data/raw/crawl_*.jsonl\n"
+)
 
 
-def load_raw_dir_posts(raw_dir: Path | None = None, pattern: str = "*.jsonl") -> list[PostRaw]:
+def load_raw_dir_posts(raw_dir: Path | None = None) -> list[PostRaw]:
     ensure_data_dirs()
     d = raw_dir or RAW
     files = sorted(
         f
-        for f in d.glob(pattern)
-        if f.name.endswith(".jsonl")
-        and not f.name.endswith("_provenance.json")
-        and f.name != "lab1_query_plan.json"
+        for f in d.glob("*.jsonl")
+        if f.name.startswith("import_") or f.name.startswith("crawl_")
     )
-    # Ignore auto-written snapshot so "auto" can refresh from fixture.
-    # Manual imports / crawls should use these names:
-    #   data/raw/import_*.jsonl  OR  data/raw/crawl_*.jsonl
-    manual = [f for f in files if f.name.startswith("import_") or f.name.startswith("crawl_")]
-    use_files = manual if manual else []
-    if not use_files:
-        raise CollectionError(f"no manual/crawl raw jsonl under {d} (expect import_*.jsonl or crawl_*.jsonl)")
+    if not files:
+        raise CollectionError(NO_FAKE_DATA_MSG + f"(looked under {d})")
     rows: list[dict] = []
-    for f in use_files:
+    for f in files:
         rows.extend(read_jsonl(f))
     if not rows:
-        raise CollectionError(f"empty manual/crawl raw jsonl under {d}")
+        raise CollectionError(NO_FAKE_DATA_MSG + f"(empty files under {d})")
+    # sanity: reject fixture-looking platforms dominating a supposed real dump
+    platforms = {r.get("platform") for r in rows}
+    if platforms == {"fixture"}:
+        raise CollectionError(NO_FAKE_DATA_MSG + "(file only contains platform=fixture)")
     return parse_models(rows, PostRaw)
 
 
 def try_crawl_posts() -> list[PostRaw]:
-    """Collect via vendored dataabc/weibo-search outputs.
-
-    Preferred path:
-      1) python scripts/run_weibo_crawl.py   # needs WEIBO_COOKIE
-      2) python scripts/convert_weibo_to_lab1.py
-      3) Lab1 source=raw / auto picks crawl_*.jsonl
-
-    This function:
-      - if crawl_*.jsonl already exists -> load it
-      - else if weibo CSV结果 folders exist -> convert then load
-      - else raise with setup instructions (do not silently invent posts)
-    """
+    """Load real Weibo crawl outputs only. Never fabricate rows."""
     ensure_data_dirs()
     existing = sorted(RAW.glob("crawl_*.jsonl"))
     if existing:
         rows: list[dict] = []
         for f in existing:
             rows.extend(read_jsonl(f))
-        if rows:
+        if rows and not ({r.get("platform") for r in rows} == {"fixture"}):
             return parse_models(rows, PostRaw)
 
-    # Lazy import: converter depends on lab1 package layout
     from src.lab1_collection.weibo_adapter import RESULT_ROOT, convert_weibo_csvs
 
     if RESULT_ROOT.exists() and any(RESULT_ROOT.rglob("*.csv")):
@@ -88,23 +79,22 @@ def try_crawl_posts() -> list[PostRaw]:
 
     cookie = os.getenv("WEIBO_COOKIE", "").strip()
     cookie_file = Path(__file__).resolve().parents[2] / "secrets" / "weibo_cookie.txt"
-    has_cookie = bool(cookie) or (cookie_file.exists() and cookie_file.read_text(encoding="utf-8").strip())
-    hint = (
-        "No crawled Weibo data found.\n"
-        "Vendor used: third_party/weibo-search (https://github.com/dataabc/weibo-search)\n"
-        "Steps:\n"
-        "  1) pip install -r third_party/weibo-search/requirements.txt\n"
-        "  2) put cookie into secrets/weibo_cookie.txt\n"
-        "  3) python scripts/run_weibo_crawl.py\n"
-        "  4) python scripts/convert_weibo_to_lab1.py --run-lab1\n"
-    )
+    has_cookie = bool(cookie)
+    if cookie_file.exists():
+        body = cookie_file.read_text(encoding="utf-8")
+        has_cookie = has_cookie or any(
+            ln.strip() and not ln.strip().startswith("#") for ln in body.splitlines()
+        )
+    hint = NO_FAKE_DATA_MSG
     if not has_cookie:
-        hint += "(Cookie missing — Weibo anonymous search is blocked.)\n"
+        hint += "(Cookie missing — cannot crawl yet.)\n"
+    else:
+        hint += "(Cookie present but crawl/convert not run yet, or结果 empty.)\n"
     raise CollectionError(hint)
 
 
 def collect_raw_posts(mode: SourceMode = "auto") -> tuple[list[PostRaw], dict]:
-    """Collect PostRaw according to mode. Always returns posts + provenance dict."""
+    """Collect real PostRaw only. Never falls back to fixtures."""
     ensure_data_dirs()
     provenance: dict = {
         "mode_requested": mode,
@@ -112,33 +102,27 @@ def collect_raw_posts(mode: SourceMode = "auto") -> tuple[list[PostRaw], dict]:
         "query_count": len(build_queries()),
         "source_used": None,
         "fallback": False,
+        "fake_data_allowed": False,
         "error": None,
         "collected_at": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
     }
 
-    def _ok(posts: list[PostRaw], source: str, fallback: bool = False) -> tuple[list[PostRaw], dict]:
+    def _ok(posts: list[PostRaw], source: str) -> tuple[list[PostRaw], dict]:
         provenance["source_used"] = source
-        provenance["fallback"] = fallback
         provenance["raw_count"] = len(posts)
         return posts, provenance
-
-    if mode == "fixture":
-        return _ok(load_fixture_posts(), str(SAMPLE_RAW))
 
     if mode == "raw":
         return _ok(load_raw_dir_posts(), str(RAW))
 
     if mode == "crawl":
-        # Hard fail if no crawl data — do not silently substitute fixtures.
         return _ok(try_crawl_posts(), "crawl")
 
-    # auto: prefer manual/crawl imports, else fixture (offline-first)
+    # auto: crawl_* / import_* only — no fixture fallback
     try:
-        posts = load_raw_dir_posts()
-        return _ok(posts, str(RAW))
-    except CollectionError as e:
-        provenance["error"] = str(e)
-        return _ok(load_fixture_posts(), str(SAMPLE_RAW), fallback=True)
+        return _ok(load_raw_dir_posts(), str(RAW))
+    except CollectionError:
+        return _ok(try_crawl_posts(), "crawl")
 
 
 def persist_raw_snapshot(posts: list[PostRaw], provenance: dict, stem: str = "beijing_raw") -> Path:
@@ -146,6 +130,5 @@ def persist_raw_snapshot(posts: list[PostRaw], provenance: dict, stem: str = "be
     out = RAW / f"{stem}.jsonl"
     write_jsonl(out, dump_models(posts))
     write_json(RAW / f"{stem}_provenance.json", provenance)
-    # also dump query plan for presentation
     write_json(RAW / "lab1_query_plan.json", {"queries": provenance.get("queries", [])})
     return out

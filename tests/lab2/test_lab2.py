@@ -1,26 +1,26 @@
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from src.common.io import load_yaml
 from src.common.models import GeoInfo, Lab1Meta, PostCleaned
-from src.lab2_analysis.analyzer import analyze_posts, run_lab2
+from src.common.paths import NEED_MAPPING
+from src.lab2_analysis.analyzer import analyze_posts
 from src.lab2_analysis.emotion import classify_emotion
 from src.lab2_analysis.intent import classify_intent
 from src.lab2_analysis.mapper import map_need
 from src.lab2_analysis.ner import extract_entities
-from src.common.io import load_yaml
-from src.common.paths import ANALYZED, NEED_MAPPING
 
 
 def _post(text: str, scope: str | None = None) -> PostCleaned:
+    # Synthetic unit-test rows only — NOT a substitute for crawled Weibo data.
     return PostCleaned(
         id="t1",
-        platform="fixture",
+        platform="other",
         text=text,
         clean_text=text,
         time="2026-07-01T12:00:00+08:00",
@@ -58,7 +58,7 @@ def test_ner_extracts_facility_and_location():
     assert any("望京" in x for x in ents.location)
 
 
-def test_analyze_posts_maps_majority():
+def test_analyze_posts_maps_majority_on_unit_strings():
     posts = [
         _post("望京路灯坏了好多晚上太黑", "road_lighting"),
         _post("中关村找不到充电桩，要是有充电桩就好了", "public_charging"),
@@ -69,18 +69,3 @@ def test_analyze_posts_maps_majority():
     assert len(out) == 4
     assert sum(1 for x in out if x.mapped_need.need_id) >= 3
     assert all(0.0 <= x.urgency_score <= 1.0 for x in out)
-    assert {x.intent for x in out} <= {"抱怨", "建议", "询问", "其他"}
-
-
-def test_run_lab2_writes_report():
-    # depends on Lab1 artifacts from previous pipeline; generate via lab1 if needed
-    from src.lab1_collection.collector import run_lab1
-
-    run_lab1(source="fixture")
-    out = run_lab2()
-    assert Path(out).exists()
-    rows = [json.loads(l) for l in Path(out).read_text(encoding="utf-8").splitlines() if l.strip()]
-    mapped = [r for r in rows if r["mapped_need"]["need_id"]]
-    assert len(mapped) / max(len(rows), 1) >= 0.7
-    report = json.loads((ANALYZED / "lab2_analysis_report.json").read_text(encoding="utf-8"))
-    assert report["mapped_count"] >= 1

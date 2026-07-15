@@ -50,14 +50,15 @@ place_hints:
 platforms:
   primary: [weibo]
   secondary: [xiaohongshu]
-  fallback_fixture: fixtures/sample_raw/beijing_sample_posts.jsonl
+  # NO fixture fallback. Real crawl/import only.
+  real_data_only: true
 
 collection_policy:
   domain_nature: chronic_local_non_burst
   strategy: continuous_sampling_plus_spatial_agg
-  offline_first: true
+  offline_first: false
+  fake_data_forbidden: true
   notes: >
     Public-facility complaints are chronic and strongly geo-local, not disaster-like
     burst events. Prefer sustained sampling + region aggregation over event-trigger crawl.
-    Default runtime uses fixtures / local raw dumps; crawl backend is optional and must
-    fall back to fixture to keep the course demo reproducible.
+    Team policy: absolutely no fake/fixture posts. Without real Weibo crawl or import, stop.
