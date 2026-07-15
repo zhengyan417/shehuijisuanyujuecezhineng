@@ -1,0 +1,126 @@
+"""Text cleaning, dedupe, and in-scope filtering.
+
+OWNER: AGENT_LAB1
+"""
+
+from __future__ import annotations
+
+import hashlib
+import re
+import unicodedata
+from collections.abc import Iterable
+
+from src.common.io import load_yaml
+from src.common.models import FacilityScope, GeoInfo, Lab1Meta, PostCleaned, PostRaw
+from src.common.paths import KEYWORDS
+from src.lab1_collection.geo import infer_district
+
+LAB1_VERSION = "lab1-0.2.0"
+
+_URL_RE = re.compile(r"https?://\S+|www\.\S+", re.I)
+_MENTION_RE = re.compile(r"@\S+")
+_TOPIC_RE = re.compile(r"#[^#\s]+#")
+_MULTI_WS = re.compile(r"\s+")
+_EMOJI_LIKE = re.compile(
+    "["
+    "\U0001F300-\U0001FAFF"
+    "\U00002700-\U000027BF"
+    "]+",
+    flags=re.UNICODE,
+)
+
+
+def normalize_text(text: str) -> str:
+    text = unicodedata.normalize("NFKC", text or "")
+    text = text.replace("\u3000", " ").replace("\xa0", " ")
+    text = _URL_RE.sub(" ", text)
+    text = _MENTION_RE.sub(" ", text)
+    # keep topic words but strip # wrappers
+    text = _TOPIC_RE.sub(lambda m: m.group(0).strip("#"), text)
+    text = _EMOJI_LIKE.sub(" ", text)
+    text = _MULTI_WS.sub(" ", text).strip()
+    return text
+
+
+def fingerprint(text: str) -> str:
+    # light near-dup: remove spaces/punct differences
+    key = re.sub(r"[\s\W_]+", "", text, flags=re.UNICODE).lower()
+    return hashlib.md5(key.encode("utf-8")).hexdigest()
+
+
+def infer_facility_scope(text: str, hint: FacilityScope | None) -> FacilityScope | None:
+    if hint:
+        return hint
+    tax = load_yaml(KEYWORDS).get("facility_types") or {}
+    scores: dict[str, int] = {}
+    for scope, cfg in tax.items():
+        score = 0
+        for w in list(cfg.get("labels") or []) + list(cfg.get("symptoms") or []):
+            if w and w in text:
+                score += 2 if w in (cfg.get("labels") or []) else 1
+        if score:
+            scores[scope] = score
+    if not scores:
+        return None
+    return max(scores, key=scores.get)  # type: ignore[arg-type]
+
+
+def clean_posts(posts: Iterable[PostRaw]) -> list[PostCleaned]:
+    seen: set[str] = set()
+    out: list[PostCleaned] = []
+
+    for p in posts:
+        clean_text = normalize_text(p.text)
+        dropped = False
+        drop_reason = None
+        is_dup = False
+
+        if len(clean_text) < 8:
+            dropped = True
+            drop_reason = "too_short"
+
+        fp = fingerprint(clean_text)
+        if fp in seen:
+            is_dup = True
+            dropped = True
+            drop_reason = "duplicate"
+        else:
+            seen.add(fp)
+
+        scope = infer_facility_scope(clean_text, p.facility_scope_hint)
+        if not dropped and scope is None:
+            dropped = True
+            drop_reason = "out_of_scope"
+
+        district, conf, matched = infer_district(
+            clean_text,
+            district_hint=p.district_hint,
+            geo_raw=p.geo_raw,
+            poi=p.poi,
+        )
+        geo = GeoInfo(
+            raw=p.geo_raw or matched,
+            poi=p.poi or matched,
+            district=district,
+            confidence=conf,
+        )
+
+        out.append(
+            PostCleaned(
+                id=p.id,
+                platform=p.platform,
+                text=p.text,
+                clean_text=clean_text,
+                time=p.time,
+                city="北京",
+                geo=geo,
+                meta=Lab1Meta(
+                    lab1_version=LAB1_VERSION,
+                    is_duplicate=is_dup,
+                    dropped=dropped,
+                    drop_reason=drop_reason,
+                    facility_scope_hint=scope,
+                ),
+            )
+        )
+    return out

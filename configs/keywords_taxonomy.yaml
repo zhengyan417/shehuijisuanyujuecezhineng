@@ -1,37 +1,51 @@
 # Lab1 keyword taxonomy for Beijing silent-demand discovery.
 # Layers: facility -> symptom -> place_hint -> need_cue
 # Coding agents: treat this file as Lab1-owned. Lab2/Lab3 may READ only.
+#
+# Domain characteristics (presentation + collection strategy):
+# - chronic: complaints persist days/weeks, not a single disaster spike
+# - strongly local: district / POI / landmark is critical for aggregation
+# - non-burst: use continuous multi-query sampling, not event-trigger crawl
+# - multi-intent in the wild: 抱怨 / 建议 / 询问 coexist (handled in Lab2)
 
-version: 1
+version: 2
 city: 北京
 
 facility_types:
   road_lighting:
-    labels: [路灯, 道路照明, 夜间照明, 灯不亮, 黑灯瞎火]
-    symptoms: [坏了, 不亮, 太黑, 半亮, 忽明忽暗, 没修, 黑漆漆]
-    need_cues: [修一下, 能不能修, 希望快点修好, 晚上不敢走]
+    labels: [路灯, 道路照明, 夜间照明, 灯不亮, 黑灯瞎火, 马路灯, 路灯杆]
+    symptoms: [坏了, 不亮, 太黑, 半亮, 忽明忽暗, 没修, 黑漆漆, 熄灭, 断电]
+    need_cues: [修一下, 能不能修, 希望快点修好, 晚上不敢走, 补装路灯, 照明不够]
   public_charging:
-    labels: [充电桩, 公共充电, 新能源充电, 慢充, 快充, 充电站]
-    symptoms: [找不到, 排队, 坏了, 被占位, 不够用, 离得远, 故障]
-    need_cues: [要是有充电桩就好了, 能不能多装点, 附近有充电吗]
+    labels: [充电桩, 公共充电, 新能源充电, 慢充, 快充, 充电站, 换电站]
+    symptoms: [找不到, 排队, 坏了, 被占位, 不够用, 离得远, 故障, 充不上, 排队太久]
+    need_cues: [要是有充电桩就好了, 能不能多装点, 附近有充电吗, 多建充电站]
   public_transit:
-    labels: [公交站, 公交站台, 候车亭, 天桥, 过街天桥, 人行天桥]
-    symptoms: [太远, 没遮雨, 破损, 不方便过马路, 危险, 拥堵, 没指示]
-    need_cues: [能不能修个天桥, 希望加个站台, 过马路太危险]
+    labels: [公交站, 公交站台, 候车亭, 天桥, 过街天桥, 人行天桥, 过街设施]
+    symptoms: [太远, 没遮雨, 破损, 不方便过马路, 危险, 拥堵, 没指示, 积水, 台阶坏了]
+    need_cues: [能不能修个天桥, 希望加个站台, 过马路太危险, 修候车亭]
 
 place_hints:
-  districts_prefix: true  # combine district + facility keywords
+  districts_prefix: true
   landmarks_examples:
     - 望京
+    - 三里屯
     - 中关村
+    - 五道口
+    - 西二旗
+    - 上地
     - 回龙观
+    - 天通苑
     - 通州北苑
     - 西单
     - 国贸
-    - 五道口
     - 清河
     - 亦庄
-    - 天通苑
+    - 金融街
+    - 王府井
+    - 后沙峪
+    - 良乡
+    - 苹果园
 
 platforms:
   primary: [weibo]
@@ -41,6 +55,9 @@ platforms:
 collection_policy:
   domain_nature: chronic_local_non_burst
   strategy: continuous_sampling_plus_spatial_agg
+  offline_first: true
   notes: >
     Public-facility complaints are chronic and strongly geo-local, not disaster-like
     burst events. Prefer sustained sampling + region aggregation over event-trigger crawl.
+    Default runtime uses fixtures / local raw dumps; crawl backend is optional and must
+    fall back to fixture to keep the course demo reproducible.

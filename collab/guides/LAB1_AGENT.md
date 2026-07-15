@@ -48,6 +48,17 @@ Produce reproducible Beijing cleaned posts for scopes:
 3. Add real collector behind a flag, default offline
 4. Record crawl failures and auto-fallback to fixture
 
+## Current status (2026-07-15)
+
+Implemented by AGENT_LAB1 (甘和君):
+- taxonomy v2 + query planner (`queries.py`)
+- geo inference (`geo.py`)
+- cleaner with near-dup / out_of_scope drops (`cleaner.py`)
+- offline-first sources with fixture fallback (`sources.py`)
+- reports: `data/cleaned/lab1_cleaning_report.json`, `data/raw/lab1_query_plan.json`
+
+Manual raw import path: place `data/raw/import_*.jsonl` then `python scripts/run_lab1.py --source raw`
+
 ## Validation snippet
 
 ```bash
