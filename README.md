@@ -27,6 +27,19 @@ python -m pytest -q
 
 Offline fixture path is default when `data/raw/` has no crawl outputs.
 
+### Real Weibo crawl (Lab1)
+
+Vendored crawler: `third_party/weibo-search` = [dataabc/weibo-search](https://github.com/dataabc/weibo-search)
+
+```bash
+pip install -r requirements.txt
+# put Cookie into secrets/weibo_cookie.txt
+python scripts/run_weibo_crawl.py
+python scripts/convert_weibo_to_lab1.py --run-lab1
+```
+
+See `third_party/README_weibo_search.md`.
+
 ## Layout
 
 ```text

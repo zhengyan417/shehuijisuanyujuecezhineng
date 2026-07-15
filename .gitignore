@@ -24,6 +24,7 @@ Thumbs.db
 # Runtime outputs (keep directory markers via .gitkeep)
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/crawl_*.jsonl
 data/cleaned/*
 !data/cleaned/.gitkeep
 data/analyzed/*
@@ -32,9 +33,15 @@ data/reports/*
 !data/reports/.gitkeep
 
 # Secrets / local agent notes
-secrets/
+secrets/*
+!secrets/*.example
 *.local.md
 .agent-lock
+
+# Vendored weibo-search runtime artifacts
+third_party/weibo-search/结果文件/
+third_party/weibo-search/crawls/
+third_party/weibo-search/**/__pycache__/
 
 # Large lecture transcripts (local only; not needed for multi-agent coding)
 le1.md

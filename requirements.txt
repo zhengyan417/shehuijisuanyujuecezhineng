@@ -4,3 +4,7 @@ click>=8.1
 rich>=13.0
 pytest>=8.0
 python-dateutil>=2.9
+httpx>=0.27
+# Lab1 Weibo crawl (vendored dataabc/weibo-search)
+Scrapy>=2.11,<3
+requests>=2.31,<3

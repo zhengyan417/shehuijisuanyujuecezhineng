@@ -8,6 +8,7 @@ If a future crawl plugin fails, automatically fall back to fixtures.
 
 from __future__ import annotations
 
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
@@ -57,18 +58,49 @@ def load_raw_dir_posts(raw_dir: Path | None = None, pattern: str = "*.jsonl") ->
 
 
 def try_crawl_posts() -> list[PostRaw]:
-    """Optional crawl entrypoint.
+    """Collect via vendored dataabc/weibo-search outputs.
 
-    Intentionally not implementing platform scrapers here:
-    - anti-bot / ToS risk
-    - course requires reproducible offline demo
+    Preferred path:
+      1) python scripts/run_weibo_crawl.py   # needs WEIBO_COOKIE
+      2) python scripts/convert_weibo_to_lab1.py
+      3) Lab1 source=raw / auto picks crawl_*.jsonl
 
-    Hook for future: read credentials from env and call an approved API client.
-    Always raise for now so caller falls back.
+    This function:
+      - if crawl_*.jsonl already exists -> load it
+      - else if weibo CSV结果 folders exist -> convert then load
+      - else raise with setup instructions (do not silently invent posts)
     """
-    raise CollectionError(
-        "crawl backend not configured; set --source fixture|raw or provide data/raw/import_*.jsonl"
+    ensure_data_dirs()
+    existing = sorted(RAW.glob("crawl_*.jsonl"))
+    if existing:
+        rows: list[dict] = []
+        for f in existing:
+            rows.extend(read_jsonl(f))
+        if rows:
+            return parse_models(rows, PostRaw)
+
+    # Lazy import: converter depends on lab1 package layout
+    from src.lab1_collection.weibo_adapter import RESULT_ROOT, convert_weibo_csvs
+
+    if RESULT_ROOT.exists() and any(RESULT_ROOT.rglob("*.csv")):
+        out = convert_weibo_csvs()
+        return parse_models(read_jsonl(out), PostRaw)
+
+    cookie = os.getenv("WEIBO_COOKIE", "").strip()
+    cookie_file = Path(__file__).resolve().parents[2] / "secrets" / "weibo_cookie.txt"
+    has_cookie = bool(cookie) or (cookie_file.exists() and cookie_file.read_text(encoding="utf-8").strip())
+    hint = (
+        "No crawled Weibo data found.\n"
+        "Vendor used: third_party/weibo-search (https://github.com/dataabc/weibo-search)\n"
+        "Steps:\n"
+        "  1) pip install -r third_party/weibo-search/requirements.txt\n"
+        "  2) put cookie into secrets/weibo_cookie.txt\n"
+        "  3) python scripts/run_weibo_crawl.py\n"
+        "  4) python scripts/convert_weibo_to_lab1.py --run-lab1\n"
     )
+    if not has_cookie:
+        hint += "(Cookie missing — Weibo anonymous search is blocked.)\n"
+    raise CollectionError(hint)
 
 
 def collect_raw_posts(mode: SourceMode = "auto") -> tuple[list[PostRaw], dict]:
@@ -97,12 +129,8 @@ def collect_raw_posts(mode: SourceMode = "auto") -> tuple[list[PostRaw], dict]:
         return _ok(load_raw_dir_posts(), str(RAW))
 
     if mode == "crawl":
-        try:
-            return _ok(try_crawl_posts(), "crawl")
-        except CollectionError as e:
-            provenance["error"] = str(e)
-            posts = load_fixture_posts()
-            return _ok(posts, str(SAMPLE_RAW), fallback=True)
+        # Hard fail if no crawl data — do not silently substitute fixtures.
+        return _ok(try_crawl_posts(), "crawl")
 
     # auto: prefer manual/crawl imports, else fixture (offline-first)
     try:

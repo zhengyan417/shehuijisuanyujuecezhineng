@@ -11,14 +11,19 @@ Produce reproducible Beijing cleaned posts for scopes:
 
 - `src/lab1_collection/**`
 - `configs/keywords_taxonomy.yaml`
+- `configs/weibo_keywords.txt`
 - `scripts/run_lab1.py`
+- `scripts/run_weibo_crawl.py`
+- `scripts/convert_weibo_to_lab1.py`
 - `fixtures/sample_raw/**`
+- `third_party/weibo-search/**` (vendored crawler)
 - optional `tests/lab1/**`
 
 ## Required outputs
 
 - `data/cleaned/beijing_cleaned.jsonl` (kept rows only)
 - optional audit: `data/cleaned/beijing_cleaned_with_drops.jsonl`
+- real crawl: `data/raw/crawl_weibo_beijing.jsonl`
 
 ## Allowed work
 
@@ -41,27 +46,20 @@ Produce reproducible Beijing cleaned posts for scopes:
 4. Docs in taxonomy explain chronic/local sampling rationale
 5. No PII raw values committed
 
-## Suggested implementation order
+## Real crawl (cookie required)
 
-1. Keep fixture pipeline green
-2. Improve geo/district inference
-3. Add real collector behind a flag, default offline
-4. Record crawl failures and auto-fallback to fixture
+Vendored from https://github.com/dataabc/weibo-search -> `third_party/weibo-search`
 
-## Current status (2026-07-15)
-
-Implemented by AGENT_LAB1 (甘和君):
-- taxonomy v2 + query planner (`queries.py`)
-- geo inference (`geo.py`)
-- cleaner with near-dup / out_of_scope drops (`cleaner.py`)
-- offline-first sources with fixture fallback (`sources.py`)
-- reports: `data/cleaned/lab1_cleaning_report.json`, `data/raw/lab1_query_plan.json`
-
-Manual raw import path: place `data/raw/import_*.jsonl` then `python scripts/run_lab1.py --source raw`
+```bash
+pip install -r requirements.txt
+# copy secrets/weibo_cookie.txt.example -> secrets/weibo_cookie.txt and paste Cookie
+python scripts/run_weibo_crawl.py --start 2026-06-01 --end 2026-07-15 --limit 80
+python scripts/convert_weibo_to_lab1.py --run-lab1
+```
 
 ## Validation snippet
 
 ```bash
-python scripts/run_lab1.py
+python scripts/run_lab1.py --source fixture
 python -c "from pathlib import Path; print(sum(1 for _ in open('data/cleaned/beijing_cleaned.jsonl',encoding='utf-8')))"
 ```
