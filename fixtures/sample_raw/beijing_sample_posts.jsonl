@@ -1,0 +1,11 @@
+{"id":"bj_rl_001","platform":"fixture","text":"望京SOHO附近路灯坏了好多，晚上走路黑漆漆的，太危险了","time":"2026-07-01T21:12:00+08:00","city":"北京","geo_raw":"望京","district_hint":"朝阳区","facility_scope_hint":"road_lighting","source_query":"路灯 坏了"}
+{"id":"bj_rl_002","platform":"fixture","text":"回龙观某条路晚上太黑，希望补充道路照明，现在不敢走","time":"2026-07-02T22:05:00+08:00","city":"北京","district_hint":"昌平区","facility_scope_hint":"road_lighting","source_query":"太黑 路灯"}
+{"id":"bj_rl_003","platform":"fixture","text":"海淀五道口这边灯忽明忽暗，路灯不亮的问题反复出现没人管","time":"2026-07-03T20:40:00+08:00","city":"北京","district_hint":"海淀区","facility_scope_hint":"road_lighting"}
+{"id":"bj_ch_001","platform":"fixture","text":"中关村附近找不到充电桩，新能源车主太难受了，要是有充电桩就好了","time":"2026-07-04T12:18:00+08:00","city":"北京","district_hint":"海淀区","facility_scope_hint":"public_charging"}
+{"id":"bj_ch_002","platform":"fixture","text":"亦庄这个充电站充电桩坏了两台，还总有燃油车占位，真无语","time":"2026-07-05T18:33:00+08:00","city":"北京","district_hint":"大兴区","facility_scope_hint":"public_charging"}
+{"id":"bj_ch_003","platform":"fixture","text":"请问通州北苑附近哪里有充电桩？公共充电太不够用了","time":"2026-07-06T09:20:00+08:00","city":"北京","district_hint":"通州区","facility_scope_hint":"public_charging"}
+{"id":"bj_pt_001","platform":"fixture","text":"国贸附近公交站没遮雨，候车亭坏了大半，下雨根本没法等车","time":"2026-07-07T08:11:00+08:00","city":"北京","district_hint":"朝阳区","facility_scope_hint":"public_transit"}
+{"id":"bj_pt_002","platform":"fixture","text":"西单这边过马路太危险，能不能修个天桥啊，天桥太远不方便","time":"2026-07-08T17:45:00+08:00","city":"北京","district_hint":"西城区","facility_scope_hint":"public_transit"}
+{"id":"bj_pt_003","platform":"fixture","text":"天通苑公交站台破损严重，指示也不清楚，通勤体验太差","time":"2026-07-09T07:55:00+08:00","city":"北京","district_hint":"昌平区","facility_scope_hint":"public_transit"}
+{"id":"bj_noise_001","platform":"fixture","text":"今天北京天气不错，去公园逛逛","time":"2026-07-10T15:00:00+08:00","city":"北京","facility_scope_hint":null}
+{"id":"bj_dup_001","platform":"fixture","text":"望京SOHO附近路灯坏了好多，晚上走路黑漆漆的，太危险了","time":"2026-07-11T21:12:00+08:00","city":"北京","district_hint":"朝阳区","facility_scope_hint":"road_lighting"}

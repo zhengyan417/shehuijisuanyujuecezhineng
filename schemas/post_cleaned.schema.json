@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "post_cleaned.schema.json",
+  "title": "PostCleaned",
+  "type": "object",
+  "required": ["id", "platform", "text", "clean_text", "time", "city", "geo", "meta"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "platform": { "type": "string" },
+    "text": { "type": "string" },
+    "clean_text": { "type": "string" },
+    "time": { "type": "string" },
+    "city": { "type": "string", "const": "北京" },
+    "geo": {
+      "type": "object",
+      "required": ["raw", "poi", "district", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "raw": { "type": ["string", "null"] },
+        "poi": { "type": ["string", "null"] },
+        "district": { "type": ["string", "null"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": ["lab1_version", "is_duplicate", "dropped"],
+      "additionalProperties": false,
+      "properties": {
+        "lab1_version": { "type": "string" },
+        "is_duplicate": { "type": "boolean" },
+        "dropped": { "type": "boolean" },
+        "drop_reason": { "type": ["string", "null"] },
+        "facility_scope_hint": {
+          "type": ["string", "null"],
+          "enum": ["road_lighting", "public_charging", "public_transit", null]
+        }
+      }
+    }
+  }
+}

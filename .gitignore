@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Runtime outputs (keep directory markers via .gitkeep)
+data/raw/*
+!data/raw/.gitkeep
+data/cleaned/*
+!data/cleaned/.gitkeep
+data/analyzed/*
+!data/analyzed/.gitkeep
+data/reports/*
+!data/reports/.gitkeep
+
+# Secrets / local agent notes
+secrets/
+*.local.md
+.agent-lock
+
+# Large lecture transcripts (local only; not needed for multi-agent coding)
+le1.md
+le2.md

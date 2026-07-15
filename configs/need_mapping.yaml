@@ -1,0 +1,70 @@
+# Lab2-owned demand mapping dictionary.
+# Pattern: complaint / symptom text cues -> standardized public-service need.
+# Coding agents in Lab1/Lab3: READ ONLY unless coordinated change request filed.
+
+version: 1
+city: 北京
+
+needs_catalog:
+  - id: lighting_repair
+    name_zh: 道路照明维护与夜间步行安全保障
+    facility_scope: road_lighting
+  - id: lighting_coverage
+    name_zh: 道路照明覆盖补点
+    facility_scope: road_lighting
+  - id: charging_availability
+    name_zh: 公共充电设施供给与可用性提升
+    facility_scope: public_charging
+  - id: charging_occupancy_governance
+    name_zh: 充电车位占位治理
+    facility_scope: public_charging
+  - id: bus_stop_amenity
+    name_zh: 公交站台服务改善（遮雨/指示/候车）
+    facility_scope: public_transit
+  - id: pedestrian_crossing_safety
+    name_zh: 过街安全与天桥/通道可达性改善
+    facility_scope: public_transit
+
+# Rule order matters: first match wins.
+mapping_rules:
+  - id: R01
+    if_any_keywords: [路灯坏, 灯不亮, 路灯不亮, 半亮, 忽明忽暗]
+    need_id: lighting_repair
+    default_intent: 抱怨
+    default_emotion: 不满
+  - id: R02
+    if_any_keywords: [太黑, 黑漆漆, 晚上不敢走, 没路灯]
+    need_id: lighting_coverage
+    default_intent: 抱怨
+    default_emotion: 焦虑
+  - id: R03
+    if_any_keywords: [找不到充电, 充电桩不够, 附近没充电, 要是有充电桩]
+    need_id: charging_availability
+    default_intent: 建议
+    default_emotion: 期待
+  - id: R04
+    if_any_keywords: [充电桩坏, 充电故障, 充不上电]
+    need_id: charging_availability
+    default_intent: 抱怨
+    default_emotion: 不满
+  - id: R05
+    if_any_keywords: [占位, 燃油车占着, 充电位被占]
+    need_id: charging_occupancy_governance
+    default_intent: 抱怨
+    default_emotion: 不满
+  - id: R06
+    if_any_keywords: [公交站没遮雨, 候车亭坏, 站台破损, 没指示]
+    need_id: bus_stop_amenity
+    default_intent: 抱怨
+    default_emotion: 不满
+  - id: R07
+    if_any_keywords: [过马路危险, 没天桥, 天桥太远, 能不能修个天桥]
+    need_id: pedestrian_crossing_safety
+    default_intent: 建议
+    default_emotion: 焦虑
+  - id: R08
+    if_any_keywords: [附近哪有充电, 哪里有充电桩, 附近有公交站吗]
+    need_id: charging_availability
+    default_intent: 询问
+    default_emotion: 中性
+    # note: Lab2 may refine need_id by facility NER when present

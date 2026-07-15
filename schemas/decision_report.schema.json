@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decision_report.schema.json",
+  "title": "DecisionReport",
+  "type": "object",
+  "required": ["report_id", "city", "generated_at", "summary", "facility_gaps", "priorities", "method_notes"],
+  "additionalProperties": false,
+  "properties": {
+    "report_id": { "type": "string" },
+    "city": { "type": "string", "const": "北京" },
+    "generated_at": { "type": "string" },
+    "summary": { "type": "string" },
+    "facility_gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["district", "facility_scope", "need_id", "need_name_zh", "count", "avg_urgency", "sample_ids"],
+        "additionalProperties": false,
+        "properties": {
+          "district": { "type": "string" },
+          "facility_scope": { "type": "string" },
+          "need_id": { "type": "string" },
+          "need_name_zh": { "type": "string" },
+          "count": { "type": "integer", "minimum": 0 },
+          "avg_urgency": { "type": "number" },
+          "sample_ids": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "priorities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rank", "need_id", "district", "score", "suggested_action"],
+        "additionalProperties": false,
+        "properties": {
+          "rank": { "type": "integer", "minimum": 1 },
+          "need_id": { "type": "string" },
+          "district": { "type": "string" },
+          "score": { "type": "number" },
+          "suggested_action": { "type": "string" }
+        }
+      }
+    },
+    "method_notes": { "type": "string" },
+    "meta": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

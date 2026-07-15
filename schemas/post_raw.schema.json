@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "post_raw.schema.json",
+  "title": "PostRaw",
+  "type": "object",
+  "required": ["id", "platform", "text", "time", "city"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "platform": { "type": "string", "enum": ["weibo", "xiaohongshu", "fixture", "other"] },
+    "text": { "type": "string", "minLength": 1 },
+    "time": { "type": "string", "description": "ISO-8601 datetime string" },
+    "city": { "type": "string", "const": "北京" },
+    "url": { "type": ["string", "null"] },
+    "author_id_hash": { "type": ["string", "null"], "description": "Privacy-safe hash only; never raw PII" },
+    "geo_raw": { "type": ["string", "null"] },
+    "poi": { "type": ["string", "null"] },
+    "district_hint": { "type": ["string", "null"] },
+    "facility_scope_hint": {
+      "type": ["string", "null"],
+      "enum": ["road_lighting", "public_charging", "public_transit", null]
+    },
+    "source_query": { "type": ["string", "null"] }
+  }
+}
