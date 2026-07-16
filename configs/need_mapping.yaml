@@ -1,13 +1,13 @@
-# Lab2-owned demand mapping dictionary.
+# Lab2-owned demand mapping dictionary (real Weibo tuned).
 # complaint / symptom / inquiry cues -> standardized public-service need
 # Lab1/Lab3: READ ONLY unless coordinated SHARED change.
 
-version: 2
+version: 3
 city: 北京
 domain_note: >
-  Unlike product-review polarity, Beijing public-facility posts mix 抱怨/建议/询问.
-  Mapping dictionary is the core domain adaptation: translate unspoken complaints into
-  actionable municipal needs.
+  Tuned on Lab1 real crawl (lab1-llm-filter-0.6.0). Unlike product-review polarity,
+  Beijing facility posts mix 抱怨/建议/询问 and residual off-topic noise.
+  Prefer explicit rule hits; scope fallback ONLY when facility evidence exists.
 
 needs_catalog:
   - id: lighting_repair
@@ -30,72 +30,202 @@ needs_catalog:
     facility_scope: public_transit
 
 intent_cues:
-  询问: [哪有, 哪里, 有没有, 请问, 附近哪, 在哪, 有么, 有吗]
-  建议: [能不能, 希望, 要是能, 建议, 多装点, 多建, 补装, 修一下吧, 尽快]
-  抱怨: [太, 坏了, 烦, 无语, 没人管, 危险, 不敢走, 破损, 故障, 排队太久, 占位]
+  询问: [哪有, 哪里, 有没有, 请问, 附近哪, 在哪, 有么, 有吗, 啥情况, 怎么惩治, 如何解决]
+  建议: [能不能, 希望, 要是能, 建议, 多装点, 多建, 补装, 修一修, 修一下, 尽快, 请解决, 求帮助, 有人能管]
+  抱怨: [不亮, 坏了, 黑乎乎, 黑灯瞎火, 昏暗, 没人管, 危险, 不敢走, 破损, 故障, 排队, 占位, 赖在, 充不上, 找不到, 无语, 气得, 摸着黑, 全都不亮, 都不亮]
 
 emotion_cues:
-  焦虑: [不敢走, 太危险, 害怕, 黑漆漆, 不安全, 晚上不敢]
-  不满: [无语, 没人管, 反复, 破损, 坏了, 占位, 充不上, 太差, 烦死]
-  期待: [希望, 要是能, 能不能, 多装点, 多建, 建议]
-  中性: [请问, 哪里, 哪有, 有没有]
+  焦虑: [不敢走, 太危险, 害怕, 黑漆漆, 黑乎乎, 不安全, 晚上不敢, 摸着黑, 黑灯瞎火, 小心驾驶]
+  不满: [无语, 没人管, 反复, 破损, 坏了, 占位, 赖在, 充不上, 太差, 烦死, 气得, 不配合, 排队]
+  期待: [希望, 要是能, 能不能, 多装点, 多建, 建议, 请解决, 求帮助]
+  中性: [请问, 哪里, 哪有, 有没有, 啥情况]
+
+# Soft evidence that a post is actually about the facility (for fallback gating).
+scope_evidence_cues:
+  road_lighting: [路灯, 道路照明, 夜间照明, 马路灯, 灯杆, 黑灯瞎火, 红绿灯, 信号灯, 照明]
+  public_charging: [充电桩, 充电站, 充电位, 快充, 慢充, 换电站, 公共充电, 特斯拉充电, 电动汽车充电, 装充电桩]
+  public_transit: [公交站, 候车亭, 站台, 天桥, 过街, 人行天桥, 过马路, 公交车]
 
 # Rule order matters: first match wins.
 mapping_rules:
+  # --- lighting repair ---
   - id: R01
-    if_any_keywords: [路灯坏, 灯不亮, 路灯不亮, 半亮, 忽明忽暗, 灯杆坏, 马路灯坏, 熄灭]
+    if_any_keywords:
+      - 路灯坏
+      - 灯不亮
+      - 路灯不亮
+      - 路灯都不亮
+      - 路灯全都不亮
+      - 路灯也不亮
+      - 半亮
+      - 忽明忽暗
+      - 灯杆坏
+      - 马路灯坏
+      - 熄灭
+      - 失明路灯
+      - 路灯坏了
+      - 人行道路灯坏
+      - 路灯ms坏了
     need_id: lighting_repair
     default_intent: 抱怨
     default_emotion: 不满
+  - id: R01b
+    if_any_keywords: [路灯.*不亮, 不亮.*路灯, 路灯.*坏, 坏了.*路灯]
+    need_id: lighting_repair
+    default_intent: 抱怨
+    default_emotion: 不满
+    match_mode: regex_or_keyword
+  - id: R01c
+    if_any_keywords: [红绿灯.*坏, 信号灯.*坏, 红绿灯也挂了, 红绿灯都灭]
+    need_id: lighting_repair
+    default_intent: 抱怨
+    default_emotion: 不满
+    match_mode: regex_or_keyword
+
+  # --- lighting coverage / darkness ---
   - id: R02
-    if_any_keywords: [太黑, 黑漆漆, 晚上不敢走, 没路灯, 照明不够, 夜间照明太差, 补装路灯, 黑灯瞎火]
+    if_any_keywords:
+      - 太黑
+      - 黑漆漆
+      - 黑乎乎
+      - 晚上不敢走
+      - 没路灯
+      - 照明不够
+      - 夜间照明太差
+      - 补装路灯
+      - 黑灯瞎火
+      - 摸着黑
+      - 昏暗
+      - 怕黑
     need_id: lighting_coverage
     default_intent: 抱怨
     default_emotion: 焦虑
+
+  # --- charging occupancy ---
   - id: R03
-    if_any_keywords: [占位, 燃油车占, 充电位被占, 油车占着, 占着充电]
+    if_any_keywords:
+      - 占位
+      - 燃油车占
+      - 充电位被占
+      - 油车占着
+      - 占着充电
+      - 赖在
+      - 充电桩车位上不走
+      - 随便停这儿
+      - 不留挪车电话
     need_id: charging_occupancy_governance
     default_intent: 抱怨
     default_emotion: 不满
+
+  # --- charging broken / can't charge ---
   - id: R04
-    if_any_keywords: [充电桩坏, 充电故障, 充不上电, 充电站故障, 慢充坏, 快充坏]
+    if_any_keywords:
+      - 充电桩坏
+      - 充电故障
+      - 充不上电
+      - 充不上
+      - 充电站故障
+      - 慢充坏
+      - 快充坏
+      - 充电器是没有通电
+      - 没有通电
+      - 不匹配
     need_id: charging_availability
     default_intent: 抱怨
     default_emotion: 不满
+
+  # --- charging shortage / queue ---
   - id: R05
-    if_any_keywords: [找不到充电, 充电桩不够, 附近没充电, 要是有充电桩, 公共充电不够, 充电供给, 排队太久, 多装点快充, 多建充电站]
+    if_any_keywords:
+      - 找不到充电
+      - 找不到电动车充电桩
+      - 充电桩不够
+      - 附近没充电
+      - 要是有充电桩
+      - 公共充电不够
+      - 充电供给
+      - 排队太久
+      - 都会排队
+      - 整天排队
+      - 多装点快充
+      - 多建充电站
+      - 想装充电桩
+      - 安装充电桩
+      - 新增.*充电桩
+      - 充电排队
+      - 充电难
+      - 换电
+      - 超充站
+      - 抢桩
     need_id: charging_availability
     default_intent: 建议
     default_emotion: 期待
+    match_mode: regex_or_keyword
+
   - id: R06
-    if_any_keywords: [附近哪有充电, 哪里有充电桩, 附近有充电吗, 请问.*充电]
+    if_any_keywords: [附近哪有充电, 哪里有充电桩, 附近有充电吗, 请问.*充电, 哪有.*充电桩]
     need_id: charging_availability
     default_intent: 询问
     default_emotion: 中性
     match_mode: regex_or_keyword
+
+  # --- bus stop amenity ---
   - id: R07
-    if_any_keywords: [公交站没遮雨, 候车亭坏, 站台破损, 没指示, 候车亭积水, 没法等车, 站台导视, 指示也不清楚]
+    if_any_keywords:
+      - 公交站没遮雨
+      - 候车亭坏
+      - 站台破损
+      - 没指示
+      - 候车亭积水
+      - 没法等车
+      - 站台导视
+      - 指示也不清楚
+      - 到公交站
+      - 公交站不到
     need_id: bus_stop_amenity
     default_intent: 抱怨
     default_emotion: 不满
+
+  - id: R07b
+    if_any_keywords: [公交站, 候车亭, 站台]
+    need_id: bus_stop_amenity
+    default_intent: 抱怨
+    default_emotion: 不满
+
+  # --- pedestrian / overpass ---
   - id: R08
-    if_any_keywords: [过马路危险, 没天桥, 天桥太远, 能不能修个天桥, 过街设施太少, 不方便过马路, 人行天桥台阶坏, 过街安全]
+    if_any_keywords:
+      - 过马路危险
+      - 没天桥
+      - 天桥太远
+      - 能不能修个天桥
+      - 过街设施太少
+      - 不方便过马路
+      - 人行天桥台阶坏
+      - 过街安全
+      - 人行道.*松动
+      - 人行道地面
     need_id: pedestrian_crossing_safety
     default_intent: 建议
     default_emotion: 焦虑
+    match_mode: regex_or_keyword
+
   - id: R09
-    if_any_keywords: [道路照明, 路灯维护, 灯不亮的问题]
+    if_any_keywords: [道路照明, 路灯维护, 灯不亮的问题, 路灯管理]
     need_id: lighting_repair
     default_intent: 抱怨
     default_emotion: 不满
+
   - id: R10
     if_any_keywords: [希望加个站台, 公交站台, 候车体验]
     need_id: bus_stop_amenity
     default_intent: 建议
     default_emotion: 期待
 
-# If no rule hits, fall back by facility scope hinted by Lab1/NER.
 scope_fallback_need:
   road_lighting: lighting_repair
   public_charging: charging_availability
   public_transit: bus_stop_amenity
+
+# Fallback only when text shows facility evidence (avoid mapping birthday/ad noise).
+scope_fallback_requires_evidence: true

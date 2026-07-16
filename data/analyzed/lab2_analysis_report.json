@@ -1,0 +1,97 @@
+{
+  "lab2_version": "lab2-0.3.0",
+  "input_count": 1473,
+  "mapped_count": 986,
+  "unmapped_count": 487,
+  "mapped_ratio": 0.669,
+  "rule_hit_count": 598,
+  "scope_fallback_count": 388,
+  "intent_counts": {
+    "抱怨": 610,
+    "其他": 634,
+    "建议": 177,
+    "询问": 52
+  },
+  "emotion_counts": {
+    "不满": 464,
+    "中性": 640,
+    "焦虑": 199,
+    "期待": 170
+  },
+  "need_counts": {
+    "lighting_repair": 508,
+    "lighting_coverage": 177,
+    "charging_occupancy_governance": 22,
+    "charging_availability": 276,
+    "bus_stop_amenity": 3
+  },
+  "rule_id_counts": {
+    "R01": 202,
+    "R01b": 77,
+    "R02": 177,
+    "SCOPE_FALLBACK": 388,
+    "R03": 22,
+    "R05": 96,
+    "R04": 14,
+    "R07": 1,
+    "R07b": 2,
+    "R09": 5,
+    "R01c": 1,
+    "R06": 1
+  },
+  "mediated_count": 0,
+  "with_facility_entity": 938,
+  "with_location_entity": 169,
+  "avg_urgency": 0.479,
+  "avg_urgency_mapped": 0.716,
+  "by_scope": {
+    "road_lighting": {
+      "n": 975,
+      "mapped": 685,
+      "mapped_ratio": 0.703,
+      "intent_counts": {
+        "抱怨": 439,
+        "其他": 402,
+        "建议": 99,
+        "询问": 35
+      },
+      "need_counts": {
+        "lighting_repair": 508,
+        "lighting_coverage": 177
+      },
+      "avg_urgency": 0.517
+    },
+    "public_charging": {
+      "n": 491,
+      "mapped": 298,
+      "mapped_ratio": 0.607,
+      "intent_counts": {
+        "询问": 17,
+        "抱怨": 169,
+        "其他": 230,
+        "建议": 75
+      },
+      "need_counts": {
+        "charging_occupancy_governance": 22,
+        "charging_availability": 276
+      },
+      "avg_urgency": 0.407
+    },
+    "public_transit": {
+      "n": 7,
+      "mapped": 3,
+      "mapped_ratio": 0.429,
+      "intent_counts": {
+        "抱怨": 2,
+        "其他": 2,
+        "建议": 3
+      },
+      "need_counts": {
+        "bus_stop_amenity": 3
+      },
+      "avg_urgency": 0.32
+    }
+  },
+  "mapping_config_version": 3,
+  "notes": "public_transit n is small in upstream Lab1 kept set; avoid over-claiming transit conclusions. Unmapped rows are residual off-topic / no facility evidence after Lab1."
+}

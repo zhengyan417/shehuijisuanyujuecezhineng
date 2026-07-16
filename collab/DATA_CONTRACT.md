@@ -34,6 +34,8 @@ If conflict: fix code/schema to match intentional design, then update this file 
    citizen demand (e.g. 接诉即办转述「市民反映…」), not first-person resident post. Downstream
    may segment or down-weight; must not treat as required field breakage. Lab1 keeps these rows
    only when the underlying demand is still unresolved (办结通稿 are dropped upstream).
+10. `PostAnalyzed.meta.is_mediated` (additive, default `false`): Lab2 pass-through of Lab1 flag
+    for Lab3 segmentation / down-weight. Not required for Lab3 aggregation to run.
 
 ## Breaking vs additive changes
 

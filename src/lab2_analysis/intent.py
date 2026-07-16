@@ -10,7 +10,7 @@ from src.common.models import Intent
 
 def classify_intent(text: str, mapping_cfg: dict, rule_intent: str | None = None) -> Intent:
     cues = mapping_cfg.get("intent_cues") or {}
-    # Inquiry has priority when explicit question markers exist
+    # Prefer explicit cues; inquiry > suggestion > complaint.
     for cue in cues.get("询问", []):
         if cue in text:
             return "询问"

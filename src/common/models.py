@@ -79,6 +79,8 @@ class Lab2Meta(BaseModel):
     lab1_version: str
     lab2_version: str = "lab2-stub-0.1.0"
     facility_scope_hint: Optional[FacilityScope] = None
+    # Pass-through from Lab1 (additive). true = mediated/second-hand demand report.
+    is_mediated: bool = False
 
 
 class PostAnalyzed(BaseModel):

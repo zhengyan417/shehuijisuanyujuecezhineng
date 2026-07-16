@@ -62,6 +62,10 @@
         "facility_scope_hint": {
           "type": ["string", "null"],
           "enum": ["road_lighting", "public_charging", "public_transit", null]
+        },
+        "is_mediated": {
+          "type": "boolean",
+          "description": "Pass-through from Lab1; true = mediated/second-hand demand report"
         }
       }
     }
