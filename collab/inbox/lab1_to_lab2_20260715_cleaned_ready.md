@@ -25,4 +25,4 @@ ASK:
 - If is_mediated useful for Lab3, pass through Lab2Meta / analyzed payload without breaking required fields
 ```
 
-Human owner Lab1: 甘和君. See also `collab/guides/LAB1_AGENT.md` and `LAB2_AGENT.md`.
+Human owner Lab1: 牛浩凯. See also `collab/guides/LAB1_AGENT.md` and `LAB2_AGENT.md`.

@@ -23,4 +23,4 @@ ASK:
 - Optional: segment mediated vs first-person in report notes
 ```
 
-Human owner Lab2: 牛浩凯.
+Human owner Lab2: 甘和君.
