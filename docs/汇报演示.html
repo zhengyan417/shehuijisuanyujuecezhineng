@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>北京公共资源「沉默需求」发现 · 课程汇报</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1c1a;
+      --bg2: #162825;
+      --panel: #1c332f;
+      --ink: #eef4f1;
+      --muted: #9bb5ad;
+      --accent: #e8a54b;
+      --accent2: #3ecfac;
+      --line: rgba(238, 244, 241, 0.12);
+      --danger: #ff7a6e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Noto Sans SC", system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(62, 207, 172, 0.12), transparent 55%),
+        radial-gradient(ellipse 70% 50% at 90% 100%, rgba(232, 165, 75, 0.10), transparent 50%),
+        linear-gradient(160deg, #0f1c1a 0%, #132421 45%, #0c1614 100%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .deck {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      width: 100%;
+    }
+
+    .slide {
+      display: none;
+      height: 100%;
+      padding: clamp(2rem, 5vh, 3.5rem) clamp(2rem, 6vw, 5rem);
+      flex-direction: column;
+      justify-content: center;
+      animation: in 320ms ease;
+    }
+    .slide.active { display: flex; }
+
+    @keyframes in {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .eyebrow {
+      font-size: 0.85rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 0.8rem;
+      font-weight: 500;
+    }
+
+    h1 {
+      font-family: "DM Serif Display", "Noto Sans SC", serif;
+      font-size: clamp(2.4rem, 5.5vw, 4rem);
+      line-height: 1.15;
+      font-weight: 400;
+      max-width: 18ch;
+    }
+
+    h2 {
+      font-family: "DM Serif Display", "Noto Sans SC", serif;
+      font-size: clamp(1.8rem, 3.8vw, 2.8rem);
+      line-height: 1.2;
+      font-weight: 400;
+      margin-bottom: 1.2rem;
+    }
+
+    .lead {
+      margin-top: 1.2rem;
+      font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+      color: var(--muted);
+      max-width: 42rem;
+      line-height: 1.65;
+    }
+
+    .meta-row {
+      margin-top: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.5rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .meta-row strong { color: var(--ink); font-weight: 500; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1.5rem 2rem;
+      align-items: start;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.9rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      h1 { max-width: none; }
+    }
+
+    .stat {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.1rem 1.2rem;
+    }
+    .stat .n {
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      color: var(--accent);
+      line-height: 1.1;
+    }
+    .stat .l {
+      margin-top: 0.35rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .panel {
+      background: rgba(28, 51, 47, 0.55);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 1.2rem 1.35rem;
+    }
+    .panel h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.7rem;
+      color: var(--accent2);
+    }
+    .panel p, .panel li {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.98rem;
+    }
+    .panel ul { padding-left: 1.1rem; }
+    .panel li + li { margin-top: 0.4rem; }
+
+    .pipeline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+    .pipe-step {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.55rem 1rem;
+      font-size: 0.92rem;
+    }
+    .pipe-step em {
+      font-style: normal;
+      color: var(--accent);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.8rem;
+      margin-right: 0.35rem;
+    }
+    .arrow { color: var(--muted); opacity: 0.6; }
+
+    .quote {
+      border-left: 3px solid var(--accent);
+      padding: 0.2rem 0 0.2rem 1rem;
+      color: var(--ink);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      max-width: 40rem;
+    }
+    .quote .tag {
+      display: inline-block;
+      margin-top: 0.8rem;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.78rem;
+      color: var(--accent2);
+    }
+
+    .map-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 1rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+    .map-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+    .map-box.need {
+      border-color: rgba(232, 165, 75, 0.45);
+      background: rgba(232, 165, 75, 0.08);
+    }
+    .map-arrow {
+      font-size: 1.5rem;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    .bar {
+      display: flex;
+      height: 1.6rem;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 0.8rem 0 0.4rem;
+      border: 1px solid var(--line);
+    }
+    .bar span { display: block; height: 100%; }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem 1.2rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.6rem;
+    }
+    .dot {
+      display: inline-block;
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 50%;
+      margin-right: 0.35rem;
+      vertical-align: middle;
+    }
+
+    .warn {
+      color: var(--accent);
+      font-size: 0.92rem;
+      margin-top: 1rem;
+    }
+
+    .footer-nav {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1.5rem;
+      background: linear-gradient(to top, rgba(15,28,26,0.95), transparent);
+      font-size: 0.82rem;
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .progress {
+      position: fixed;
+      top: 0; left: 0; height: 3px;
+      background: var(--accent);
+      z-index: 6;
+      transition: width 200ms ease;
+    }
+    .hint kbd {
+      font-family: "JetBrains Mono", monospace;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.05rem 0.35rem;
+      color: var(--ink);
+    }
+
+    .team {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 1.2rem;
+    }
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.9rem;
+      background: rgba(255,255,255,0.03);
+    }
+    .chip b { color: var(--accent2); font-weight: 500; }
+
+    .two-col-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    @media (max-width: 800px) { .two-col-list { grid-template-columns: 1fr; } }
+
+    .big-claim {
+      font-family: "DM Serif Display", "Noto Sans SC", serif;
+      font-size: clamp(1.4rem, 2.8vw, 2rem);
+      line-height: 1.45;
+      max-width: 28ch;
+      margin-top: 0.4rem;
+    }
+    .big-claim span { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <div class="deck" id="deck">
+
+    <!-- 1 -->
+    <section class="slide active" data-title="封面">
+      <div class="eyebrow">社会计算与生成决策智能 · 课程项目汇报</div>
+      <h1>北京公共资源的「沉默需求」发现</h1>
+      <p class="lead">从社交媒体抱怨中，翻译出可执行的公共服务需求——道路照明 · 公共充电 · 公交站/天桥</p>
+      <div class="meta-row">
+        <span><strong>城市</strong> 北京</span>
+        <span><strong>数据</strong> 微博真实采集 1500 → 清洗 1473</span>
+        <span><strong>时长</strong> ≈10 分钟</span>
+      </div>
+      <div class="team">
+        <span class="chip"><b>Lab1</b> 甘和君 · 采集清洗</span>
+        <span class="chip"><b>Lab2</b> 牛浩凯 · 意图/需求映射</span>
+        <span class="chip"><b>Lab3</b> 李佳锦 · 决策支持</span>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" data-title="问题">
+      <div class="eyebrow">01 · Why</div>
+      <h2>居民很少说「我要路灯」，但会说「晚上太黑」</h2>
+      <div class="grid-2">
+        <div>
+          <p class="lead" style="margin-top:0">
+            政务平台上的诉求是<strong style="color:var(--ink)">有意识投诉</strong>；
+            社交媒体上的抱怨往往是<strong style="color:var(--ink)">无意识表达</strong>。
+            中间存在断裂：识别到抱怨 ≠ 转化为可行动的公共服务需求。
+          </p>
+          <p class="warn">本项目切口：把「沉默抱怨」翻译成「沉默需求」。</p>
+        </div>
+        <div class="panel">
+          <h3>对比一眼看懂</h3>
+          <ul>
+            <li><strong style="color:var(--ink)">12345 / 留言板</strong>：主动、结构化、已是诉求</li>
+            <li><strong style="color:var(--ink)">微博日常帖</strong>：碎片、情绪化、未必自觉在「提需求」</li>
+            <li><strong style="color:var(--ink)">我们的输出</strong>：缺口清单 + 优先级，辅助决策而非替代决策</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" data-title="范围">
+      <div class="eyebrow">02 · Scope</div>
+      <h2>四天可完成：一城 · 三类设施</h2>
+      <div class="grid-3" style="margin-top:0.5rem">
+        <div class="stat"><div class="n">照明</div><div class="l">road_lighting<br/>路灯坏 / 太黑 / 夜间安全</div></div>
+        <div class="stat"><div class="n">充电</div><div class="l">public_charging<br/>缺桩 / 故障 / 占位</div></div>
+        <div class="stat"><div class="n">公交</div><div class="l">public_transit<br/>站台 / 天桥 / 过街</div></div>
+      </div>
+      <div class="panel" style="margin-top:1.2rem">
+        <h3>领域特征（决定采集策略）</h3>
+        <p>慢性 · 强地域 · 非突发 → 持续采样 + 空间聚合，而不是灾害式「事件触发抓取」。</p>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" data-title="流水线">
+      <div class="eyebrow">03 · Pipeline</div>
+      <h2>统一契约串起三 Lab</h2>
+      <div class="pipeline">
+        <div class="pipe-step"><em>L1</em> 微博采集 + 清洗</div>
+        <span class="arrow">→</span>
+        <div class="pipe-step"><em>L2</em> 意图/情绪/NER/需求映射</div>
+        <span class="arrow">→</span>
+        <div class="pipe-step"><em>L3</em> 聚合报告 / 决策支持</div>
+      </div>
+      <div class="grid-3" style="margin-top:1.5rem">
+        <div class="panel">
+          <h3>硬约束</h3>
+          <ul>
+            <li>绝对禁止假数据</li>
+            <li>无 crawl/import 则失败退出</li>
+            <li>中间态 JSONL 契约固定</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>领域适配（非通用情感）</h3>
+          <ul>
+            <li>意图：抱怨 / 建议 / 询问</li>
+            <li>情绪：不满 / 焦虑 / 期待 / 中性</li>
+            <li>核心：抱怨 → 标准需求类目</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>分工</h3>
+          <ul>
+            <li>甘和君 · Lab1</li>
+            <li>牛浩凯 · Lab2</li>
+            <li>李佳锦 · Lab3</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" data-title="Lab1">
+      <div class="eyebrow">04 · Lab1 真实数据</div>
+      <h2>微博采集 → 清洗就绪</h2>
+      <div class="grid-4">
+        <div class="stat"><div class="n">1500</div><div class="l">原始帖 crawl</div></div>
+        <div class="stat"><div class="n">1473</div><div class="l">清洗保留</div></div>
+        <div class="stat"><div class="n">975</div><div class="l">道路照明相关</div></div>
+        <div class="stat"><div class="n">491</div><div class="l">公共充电相关</div></div>
+      </div>
+      <div class="grid-2" style="margin-top:1.2rem">
+        <div class="panel">
+          <h3>怎么采、怎么洗</h3>
+          <ul>
+            <li>关键词 taxonomy（设施 × 症状 × 地点）</li>
+            <li>crawl4weibo 真实抓取（非样例）</li>
+            <li>去重 / 过短过滤；区县与地标推断</li>
+            <li>LLM 语义过滤：办结通稿、明显外地噪声等</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>汇报时要主动说的局限</h3>
+          <ul>
+            <li>公交站/天桥保留极少（仅 7 条）→ 结论勿外推</li>
+            <li>有区县定位约 15% → 空间分析需「未定位/全市」桶</li>
+            <li>仍有残余噪声，由 Lab2 证据门控消化</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" data-title="Lab2核心">
+      <div class="eyebrow">05 · Lab2 核心贡献</div>
+      <h2>不是正负情感，而是「抱怨→需求」词典</h2>
+      <div class="map-row">
+        <div class="map-box">「广顺南大街路灯四天不亮，下雪摸着黑，危险！」</div>
+        <div class="map-arrow">→</div>
+        <div class="map-box need"><strong>lighting_repair</strong><br/>道路照明维护与夜间步行安全<br/><span style="color:var(--muted);font-size:0.85rem">意图=建议/抱怨 · 情绪=焦虑 · 高紧迫度</span></div>
+      </div>
+      <div class="map-row">
+        <div class="map-box">「燃油车赖在充电桩车位不走，害得排队充不了」</div>
+        <div class="map-arrow">→</div>
+        <div class="map-box need"><strong>charging_occupancy_governance</strong><br/>充电车位占位治理</div>
+      </div>
+      <p class="lead" style="font-size:1rem;margin-top:1.2rem">这就是 domain adaptation：商品评论的正负分类回答不了「该修什么、优先修哪里」。</p>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" data-title="Lab2结果">
+      <div class="eyebrow">06 · Lab2 真实结果</div>
+      <h2>1473 条上的映射表现</h2>
+      <div class="grid-4">
+        <div class="stat"><div class="n">66.9%</div><div class="l">成功映射需求<br/>986 / 1473</div></div>
+        <div class="stat"><div class="n">598</div><div class="l">显式规则命中</div></div>
+        <div class="stat"><div class="n">487</div><div class="l">未映射（多为噪声）</div></div>
+        <div class="stat"><div class="n">0.72</div><div class="l">已映射平均紧迫度</div></div>
+      </div>
+      <div class="panel" style="margin-top:1.2rem">
+        <h3>需求分布（已映射）</h3>
+        <div class="bar" title="need distribution">
+          <span style="width:51.5%;background:#e8a54b"></span>
+          <span style="width:18.0%;background:#3ecfac"></span>
+          <span style="width:28.0%;background:#6ea8ff"></span>
+          <span style="width:2.2%;background:#c084fc"></span>
+          <span style="width:0.3%;background:#94a3b8"></span>
+        </div>
+        <div class="legend">
+          <span><i class="dot" style="background:#e8a54b"></i>照明维修 508</span>
+          <span><i class="dot" style="background:#3ecfac"></i>照明补点 177</span>
+          <span><i class="dot" style="background:#6ea8ff"></i>充电供给 276</span>
+          <span><i class="dot" style="background:#c084fc"></i>占位治理 22</span>
+          <span><i class="dot" style="background:#94a3b8"></i>站台改善 3</span>
+        </div>
+      </div>
+      <p class="warn">设计选择：无设施证据不硬贴需求——宁可漏报，也不把生日帖映射成「修路灯」。</p>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" data-title="证据">
+      <div class="eyebrow">07 · 真实帖示例</div>
+      <h2>系统读到了什么</h2>
+      <div class="two-col-list">
+        <div>
+          <p class="quote">
+            广顺南大街凯德 MALL 门前路段的路灯已经四天都不亮了，望京主干道，下着雪摸着黑，危险！有人能管管么？
+            <span class="tag">lighting_repair · 焦虑 · 朝阳/望京 · urgency 1.0</span>
+          </p>
+          <p class="quote" style="margin-top:1.2rem">
+            望京西路是怎么了？没有路灯和红绿灯！黑灯瞎火的，过马路费了劲了！
+            <span class="tag">lighting_coverage · 焦虑 · urgency 1.0</span>
+          </p>
+        </div>
+        <div>
+          <p class="quote">
+            劳斯莱斯赖在望京充电桩车位上不走，导致多辆车排队无法充电……
+            <span class="tag">charging_occupancy_governance · 不满</span>
+          </p>
+          <div class="panel" style="margin-top:1.2rem">
+            <h3>意图结构（全量）</h3>
+            <ul>
+              <li>抱怨 610 · 建议 177 · 询问 52</li>
+              <li>「其他」多为弱信号/噪声，与未映射策略一致</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" data-title="决策支持">
+      <div class="eyebrow">08 · 到决策的最后一公里</div>
+      <h2>Lab3：把映射结果变成行动清单</h2>
+      <div class="grid-2">
+        <div>
+          <p class="big-claim">给决策者的不是情绪仪表盘，而是<span>缺什么、在哪、先修谁</span>。</p>
+          <p class="lead">输入 Lab2 的 analyzed JSONL → 按区县×需求聚合 → 紧迫度排序 → 情况简报 / 缺口清单。</p>
+        </div>
+        <div class="panel">
+          <h3>当前可汇报的决策信号（基于 Lab2）</h3>
+          <ul>
+            <li><strong style="color:var(--ink)">最高频</strong>：道路照明维修（508）</li>
+            <li><strong style="color:var(--ink)">其次</strong>：公共充电供给（276）与照明补点（177）</li>
+            <li><strong style="color:var(--ink)">占位治理</strong>：样本量小但问题尖锐（22）</li>
+            <li><strong style="color:var(--ink)">公交/天桥</strong>：数据不足，标为待补采</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" data-title="收获">
+      <div class="eyebrow">09 · Takeaways</div>
+      <h2>三句话收束</h2>
+      <div class="grid-3">
+        <div class="panel">
+          <h3>1. 问题定义对了</h3>
+          <p>沉默需求 = 社媒无意识抱怨 → 可执行公共服务需求，区别于政务留言与商品评论。</p>
+        </div>
+        <div class="panel">
+          <h3>2. 真数据跑通了</h3>
+          <p>1500 微博 → 1473 清洗 → 66.9% 需求映射；禁止假数据作为底线。</p>
+        </div>
+        <div class="panel">
+          <h3>3. 适配在标签体系</h3>
+          <p>贡献不在「更炫的模型」，而在意图+情绪+需求词典的领域翻译层。</p>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:1.2rem">
+        <h3>诚实局限（老师爱听）</h3>
+        <p>公交样本过少；地理定位覆盖有限；Lab3 生成式报告仍可加强权威知识 grounding。下一步：补采 transit、提高 POI 覆盖、用 LLM 生成带证据的简报。</p>
+      </div>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" data-title="致谢">
+      <div class="eyebrow">Thanks</div>
+      <h1 style="max-width:none">谢谢老师与同学</h1>
+      <p class="lead">欢迎提问：关键词 taxonomy、需求映射规则、真实数据质量，或演示 `run_lab2.py` / analyzed 报告。</p>
+      <div class="meta-row">
+        <span><strong>仓库</strong> shehuijisuanyujuecezhineng</span>
+        <span><strong>产物</strong> beijing_cleaned.jsonl · beijing_analyzed.jsonl</span>
+      </div>
+      <div class="team">
+        <span class="chip">甘和君 · Lab1</span>
+        <span class="chip">牛浩凯 · Lab2</span>
+        <span class="chip">李佳锦 · Lab3</span>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="footer-nav">
+    <div class="hint">← → 或空格翻页 · <kbd>F</kbd> 全屏 · <kbd>Home</kbd>/<kbd>End</kbd></div>
+    <div id="counter">1 / 11</div>
+  </div>
+
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    let i = 0;
+    const counter = document.getElementById("counter");
+    const progress = document.getElementById("progress");
+
+    function show(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+      counter.textContent = `${i + 1} / ${slides.length}`;
+      progress.style.width = `${((i + 1) / slides.length) * 100}%`;
+      document.title = slides[i].dataset.title + " · 沉默需求汇报";
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) {
+        e.preventDefault(); show(i + 1);
+      } else if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) {
+        e.preventDefault(); show(i - 1);
+      } else if (e.key === "Home") { show(0); }
+      else if (e.key === "End") { show(slides.length - 1); }
+      else if (e.key.toLowerCase() === "f") {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+      }
+    });
+
+    let touchX = null;
+    window.addEventListener("touchstart", (e) => { touchX = e.changedTouches[0].screenX; });
+    window.addEventListener("touchend", (e) => {
+      if (touchX == null) return;
+      const dx = e.changedTouches[0].screenX - touchX;
+      if (Math.abs(dx) > 50) show(i + (dx < 0 ? 1 : -1));
+      touchX = null;
+    });
+
+    show(0);
+  </script>
+</body>
+</html>
