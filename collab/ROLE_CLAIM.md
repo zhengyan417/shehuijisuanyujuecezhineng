@@ -4,16 +4,16 @@ Fill once at project start. Coding agents: read this to know which role you are 
 
 | Role | Human name | Machine / agent label | Claimed at |
 | --- | --- | --- | --- |
-| AGENT_LAB1 | 甘和君 | coding-agent-lab1 | 2026-07-15 |
-| AGENT_LAB2 | 牛浩凯 | coding-agent-lab2 | 2026-07-15 |
-| AGENT_LAB3 | 李佳锦 | coding-agent-lab3 | 2026-07-15 |
+| AGENT_LAB1 | 牛浩凯 | coding-agent-lab1 | 2026-07-16 |
+| AGENT_LAB2 | 甘和君 | coding-agent-lab2 | 2026-07-16 |
+| AGENT_LAB3 | 李佳锦 | coding-agent-lab3 | 2026-07-16 |
 
 ## Module mapping
 
 | Human | Role | Owns |
 | --- | --- | --- |
-| 甘和君 | AGENT_LAB1 | `src/lab1_collection/**`, `configs/keywords_taxonomy.yaml`, fixtures |
-| 牛浩凯 | AGENT_LAB2 | `src/lab2_analysis/**`, `configs/need_mapping.yaml` |
+| 牛浩凯 | AGENT_LAB1 | `src/lab1_collection/**`, `configs/keywords_taxonomy.yaml`, crawl/fixtures |
+| 甘和君 | AGENT_LAB2 | `src/lab2_analysis/**`, `configs/need_mapping.yaml` |
 | 李佳锦 | AGENT_LAB3 | `src/lab3_decision/**`, report generation |
 
 Rules:
